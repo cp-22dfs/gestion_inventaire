@@ -112,6 +112,22 @@
                         class="btn btn-lg w-full max-w-sm rounded-full border-none bg-[#FF8C8C] hover:bg-[#f77474] text-black text-xl font-bold normal-case h-20 shadow-xl transition-all active:scale-95">
                         Télécharger QR code
                     </a>
+                @else
+                    <form action="{{ route('admin.items.qr', $item->id) }}" method="POST"
+                        class="w-full flex flex-col items-center lg:items-end">
+                        @csrf
+                        <button type="submit" class="group w-full max-w-sm flex flex-col items-center">
+                            <div
+                                class="w-64 h-64 md:w-80 md:h-80 bg-gray-50 border-4 border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center group-hover:border-[#FF8C8C] group-hover:bg-[#fffafa] transition-all duration-300">
+                                <img src="{{ asset('plus.png') }}" alt="Ajouter"
+                                    class="h-20 w-20 object-contain opacity-30 group-hover:opacity-100 group-hover:brightness-0 group-hover:invert-[55%] group-hover:sepia-[62%] group-hover:saturate-[458%] group-hover:hue-rotate-[310deg] group-hover:brightness-[102%] group-hover:contrast-[101%] transition-all duration-300">
+                                <p
+                                    class="text-gray-400 font-bold group-hover:text-[#FF8C8C] transition-colors mt-4 text-center px-4">
+                                    Cliquer pour générer <br>le QR Code
+                                </p>
+                            </div>
+                        </button>
+                    </form>
                 @endif
             </div>
         </div>
