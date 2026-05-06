@@ -10,24 +10,16 @@
 </head>
 
 <body class="bg-white min-h-screen">
-
     <header class="bg-[#FF8C8C] h-20 w-full flex items-center px-6 relative shadow-sm">
         <a href="{{ route('admin.dashboard') }}" class="hover:opacity-70 transition-opacity">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
-                stroke="currentColor" class="w-8 h-8 text-black">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-            </svg>
+            <img src="{{ asset('back.png') }}" alt="Retour" class="w-8 h-8 object-contain">
         </a>
     </header>
-
     <main class="max-w-2xl mx-auto p-8">
-
         <h1 class="text-4xl font-black text-black mb-10">Nouvel objet</h1>
-
         <form method="POST" action="{{ route('admin.items.store') }}" class="space-y-6"
             onkeydown="return event.key != 'Enter';">
             @csrf
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="form-control w-full">
                     <input type="text" name="name" placeholder="Nom" value="{{ old('name') }}"
@@ -36,7 +28,6 @@
                         <span class="text-[#FF8C8C] text-xs mt-2 ml-4 font-bold italic">{{ $message }}</span>
                     @enderror
                 </div>
-
                 <div class="form-control w-full">
                     <input type="text" name="serial_number" placeholder="Numéro de série"
                         value="{{ old('serial_number') }}"
@@ -46,7 +37,6 @@
                     @enderror
                 </div>
             </div>
-
             <div class="form-control">
                 <input type="text" name="manufacturer" placeholder="Fabricant" value="{{ old('manufacturer') }}"
                     class="input bg-gray-200 border-none rounded-full px-6 focus:ring-2 focus:ring-[#FF8C8C] placeholder-gray-500 @error('manufacturer') ring-2 ring-[#FF8C8C] @enderror">
@@ -54,7 +44,6 @@
                     <span class="text-[#FF8C8C] text-xs mt-2 ml-4 font-bold italic">{{ $message }}</span>
                 @enderror
             </div>
-
             <div class="form-control">
                 <input type="text" name="location" placeholder="Lieu de stockage (ex: Armoire A, Local 102)"
                     value="{{ old('location') }}"
@@ -63,7 +52,6 @@
                     <span class="text-[#FF8C8C] text-xs mt-2 ml-4 font-bold italic">{{ $message }}</span>
                 @enderror
             </div>
-
             <div class="form-control">
                 <textarea name="description" placeholder="Description"
                     class="textarea bg-gray-200 border-none rounded-2xl px-6 py-3 focus:ring-2 focus:ring-[#FF8C8C] placeholder-gray-500 min-h-[100px] @error('description') ring-2 ring-[#FF8C8C] @enderror">{{ old('description') }}</textarea>
@@ -79,7 +67,6 @@
             </div>
         </form>
     </main>
-
 </body>
 
 </html>

@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\Login;
 use App\Http\Controllers\Auth\Logout;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\LoanController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -19,6 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:utilisateur')->group(function () {
         Route::get('/user/dashboard', [DashboardController::class, 'user'])->name('user.dashboard');
         Route::get('/items/{item}', [ItemController::class, 'userShow'])->name('items.show');
+        Route::post('/loan', [LoanController::class, 'store'])->name('loan.store');
     });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
@@ -33,5 +35,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/items/{item}', [ItemController::class, 'destroy'])->name('items.destroy');
 
         Route::post('/items/{item}/generate-qr', [ItemController::class, 'generateQrCode'])->name('items.qr');
+
+        Route::resource('loans', LoanController::class);
     });
 });
