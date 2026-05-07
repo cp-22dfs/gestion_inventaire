@@ -19,7 +19,10 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div class="flex flex-col">
                 <h1 class="text-5xl md:text-6xl font-bold text-black">{{ $item->name }}</h1>
-                <p class="text-gray-400 text-lg mt-1 mb-10">Détails de l'objet</p>
+                @if($item->description)
+                    <p class="text-gray-400 text-xl mt-2 max-w-md font-medium">{{ $item->description }}</p>
+                @endif
+                <br>
                 <div class="space-y-6 md:space-y-8">
                     <div class="flex items-center gap-6">
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex-none flex items-center justify-center">
@@ -48,6 +51,32 @@
                     <span class="w-2 h-8 bg-[#89CFF0] rounded-full"></span>
                     Historique
                 </h2>
+                <div class="space-y-3 mb-4">
+                    @forelse($item->loans()->orderBy('start_date', 'asc')->get() as $loan)
+                        @php
+                            $today = now()->format('Y-m-d');
+                            $isCurrent = $loan->start_date <= $today && $loan->end_date_planned >= $today && !$loan->end_date;
+                            $isFuture = $loan->start_date > $today;
+                        @endphp
+                        <div
+                            class="p-4 bg-gray-50 rounded-[20px] border-2 {{ $isCurrent ? 'border-[#89CFF0]' : 'border-transparent' }}">
+                            <div class="flex justify-between items-center">
+                                <p class="font-bold text-black">{{ $loan->user->name }} {{ $loan->user->surname }}</p>
+                                <p class="text-sm text-gray-500">
+                                    {{ \Carbon\Carbon::parse($loan->start_date)->format('d.m') }} —
+                                    {{ \Carbon\Carbon::parse($loan->end_date_planned)->format('d.m') }}
+                                </p>
+                                <span
+                                    class="badge badge-sm border-none font-black
+                                                                                            {{ $isCurrent ? 'bg-[#89CFF0] text-white' : ($isFuture ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400') }}">
+                                    {{ $isCurrent ? 'ACTUEL' : ($isFuture ? 'À VENIR' : 'PASSÉ') }}
+                                </span>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-gray-400 italic text-sm">Aucune réservation pour cet objet.</p>
+                    @endforelse
+                </div>
                 <button onclick="booking_modal.showModal()"
                     class="btn btn-lg w-full rounded-full border-none bg-[#89CFF0] hover:bg-[#7bc4e6] text-black text-3xl font-bold normal-case h-20 shadow-lg transition-transform active:scale-95">
                     Réserver
@@ -61,6 +90,11 @@
             <form action="{{ route('loan.store') }}" method="POST" class="space-y-6">
                 @csrf
                 <input type="hidden" name="item_id" value="{{ $item->id }}">
+                @if($errors->has('conflict'))
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-xl">
+                        <p class="text-red-600 font-bold text-sm">{{ $errors->first('conflict') }}</p>
+                    </div>
+                @endif
                 <div class="grid grid-cols-1 gap-4">
                     <div class="form-control">
                         <label class="label"><span class="label-text font-bold text-black text-lg">Date de
@@ -79,7 +113,7 @@
                 <div class="form-control">
                     <label class="label"><span class="label-text font-bold text-black text-lg">Lieu
                             d'utilisation</span></label>
-                    <input type="text" name="location" placeholder="ex: Bureau 204"
+                    <input type="text" name="location" placeholder="ex: BD12"
                         class="input input-bordered h-14 rounded-xl bg-gray-50 border-none text-lg">
                 </div>
                 <div class="modal-action flex flex-col gap-3">
@@ -96,6 +130,14 @@
             <button>close</button>
         </form>
     </dialog>
+    @if($errors->has('conflict') || $errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                booking_modal.showModal();
+            });
+        </script>
+    @endif
+
 </body>
 
 </html>

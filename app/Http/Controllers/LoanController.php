@@ -61,6 +61,17 @@ class LoanController extends Controller
             'location' => 'nullable|string|max:255',
         ]);
 
+        $conflit = Loan::where('item_id', $request->item_id)
+            ->whereNotIn('status', ['returned'])
+            ->where('start_date', '<', $request->end_date_planned)
+            ->where('end_date_planned', '>', $request->start_date)
+            ->exists();
+
+        if ($conflit) {
+            return back()->withErrors(['conflict' => 'Cet objet est déjà réservé sur cette période.'])
+                ->withInput();
+        }
+
         Loan::create([
             'item_id' => $request->item_id,
             'user_id' => Auth::id(),

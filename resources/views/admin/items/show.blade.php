@@ -19,6 +19,9 @@
             <div>
                 <h1 class="text-5xl md:text-7xl font-black text-black leading-tight">{{ $item->name }}</h1>
                 <p class="text-gray-400 text-lg md:text-xl font-medium mt-1">Référence : {{ $item->serial_number }}</p>
+                @if($item->description)
+                    <p class="text-gray-400 text-sm mt-2 max-w-md">{{ $item->description }}</p>
+                @endif
             </div>
 
             <div class="flex gap-4">
@@ -71,7 +74,7 @@
                 @endif
                 <div class="pt-10">
                     <h2 class="text-2xl font-bold text-black flex items-center gap-3 mb-6">
-                        <span class="w-2 h-8 bg-[#FF8C8C] rounded-full"></span> Planning
+                        <span class="w-2 h-8 bg-[#FF8C8C] rounded-full"></span> Historique
                     </h2>
                     <div class="space-y-4">
                         @foreach($item->loans()->orderBy('start_date', 'asc')->take(4)->get() as $loan)
