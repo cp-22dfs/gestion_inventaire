@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Item;
 use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -61,6 +62,19 @@ class LoanController extends Controller
             'location' => 'nullable|string|max:255',
         ]);
 
+        $item = Item::find($request->item_id);
+        $currentLoan = $item->currentLoan();
+
+        if ($currentLoan && $currentLoan->status === Loan::STATUS_RESERVED) {
+            $currentLoan->update([
+                'status' => Loan::STATUS_BORROWED,
+                'location' => $request->location ?? $currentLoan->location,
+                'end_date_planned' => $request->end_date_planned ?? $currentLoan->end_date_planned,
+            ]);
+
+            return redirect()->route('user.dashboard')->with('success', 'Emprunt enregistré avec succès !');
+        }
+
         $conflit = Loan::where('item_id', $request->item_id)
             ->whereNotIn('status', ['returned'])
             ->where('start_date', '<', $request->end_date_planned)
@@ -78,9 +92,9 @@ class LoanController extends Controller
             'start_date' => $request->start_date,
             'end_date_planned' => $request->end_date_planned,
             'location' => $request->location,
-            'status' => Loan::STATUS_RESERVED,
+            'status' => $request->status === 'borrowed' ? Loan::STATUS_BORROWED : Loan::STATUS_RESERVED,
         ]);
 
-        return back()->with('success', 'Réservation créée avec succès !');
+        return redirect()->route('items.show', $request->item_id)->with('success', 'Emprunt enregistré avec succès !');
     }
 }

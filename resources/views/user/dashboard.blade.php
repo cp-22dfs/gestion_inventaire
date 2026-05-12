@@ -10,6 +10,38 @@
 </head>
 
 <body class="bg-gray-50 min-h-screen">
+
+    @if(session('returned'))
+        <div id="return-modal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div class="bg-white rounded-3xl p-10 mx-6 flex flex-col items-center gap-4 shadow-xl">
+                <img src="{{ asset('check.png') }}" alt="Succès" class="w-16 h-16 object-contain">
+                <h2 class="text-2xl font-black text-black text-center">Merci !</h2>
+                <p class="text-gray-400 text-center font-medium">
+                    <span class="text-black font-bold">{{ session('returned') }}</span> a bien été rendu.
+                </p>
+                <button onclick="document.getElementById('return-modal').remove()"
+                    class="btn btn-lg w-full rounded-full border-none bg-[#89CFF0] text-black font-bold normal-case h-14">
+                    OK
+                </button>
+            </div>
+        </div>
+    @endif
+    @if(session('occupied'))
+        <div id="occupied-modal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div class="bg-white rounded-3xl p-10 mx-6 flex flex-col items-center gap-4 shadow-xl">
+                <img src="{{ asset('exclamation.png') }}" alt="Erreur" class="w-16 h-16 object-contain">
+                <h2 class="text-2xl font-black text-black text-center">Objet indisponible</h2>
+                <p class="text-gray-400 text-center font-medium">
+                    <span class="text-black font-bold">{{ session('occupied') }}</span> est déjà emprunté par quelqu'un
+                    d'autre.
+                </p>
+                <button onclick="document.getElementById('occupied-modal').remove()"
+                    class="btn btn-lg w-full rounded-full border-none bg-[#FF8C8C] text-black font-bold normal-case h-14">
+                    OK
+                </button>
+            </div>
+        </div>
+    @endif
     <header class="bg-[#89d2ff] shadow-sm">
         <div class="max-w-7xl mx-auto px-6 py-8 flex justify-between items-center">
             <h1 class="text-2xl md:text-4xl font-black text-black">
@@ -50,10 +82,10 @@
         <div class="h-32"></div>
     </main>
     <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 w-full max-w-xs px-6">
-        <button
+        <a href="{{ route('scan') }}"
             class="btn btn-lg rounded-full border-none font-black bg-[#89d2ff] hover:bg-[#70c4f5] normal-case w-full h-16 text-xl text-black">
             Scanner
-        </button>
+        </a>
     </div>
 </body>
 

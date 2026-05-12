@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\Loan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -91,5 +93,40 @@ class ItemController extends Controller
         ]);
 
         return back()->with('success', 'QR Code généré avec succès.');
+    }
+
+    public function scan(Request $request)
+    {
+        $request->validate([
+            'serial_number' => 'required|string',
+        ]);
+
+        $item = Item::where('serial_number', $request->serial_number)->first();
+
+        if (!$item) {
+            return back()->withErrors([
+                'serial_number' => 'Aucun objet trouvé avec ce numéro de série.'
+            ]);
+        }
+
+        $currentLoan = $item->currentLoan();
+
+        if ($currentLoan && $currentLoan->status === Loan::STATUS_BORROWED) {
+            if ($currentLoan->user_id === Auth::id()) {
+                $currentLoan->update([
+                    'status' => 'returned',
+                    'end_date' => now(),
+                ]);
+                return redirect()->route('user.dashboard')->with('returned', $item->name);
+            }
+            return redirect()->route('user.dashboard')->with('occupied', $item->name);
+        }
+        return redirect()->route('borrow.show', $item->id);
+    }
+
+    public function borrowShow(Item $item)
+    {
+        $currentLoan = $item->currentLoan();
+        return view('user.borrow', compact('item', 'currentLoan'));
     }
 }

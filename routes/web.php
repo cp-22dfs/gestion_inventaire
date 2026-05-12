@@ -21,6 +21,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/dashboard', [DashboardController::class, 'user'])->name('user.dashboard');
         Route::get('/items/{item}', [ItemController::class, 'userShow'])->name('items.show');
         Route::post('/loan', [LoanController::class, 'store'])->name('loan.store');
+        Route::get('/scan', function () {
+            return view('user.scan');
+        })->name('scan');
+        Route::post('/scan', [ItemController::class, 'scan'])->name('scan.post');
+        Route::get('/borrow/{item}', [ItemController::class, 'borrowShow'])->name('borrow.show');
     });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {

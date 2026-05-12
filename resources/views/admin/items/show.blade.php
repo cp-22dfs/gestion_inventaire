@@ -77,31 +77,52 @@
                         <span class="w-2 h-8 bg-[#FF8C8C] rounded-full"></span> Historique
                     </h2>
                     <div class="space-y-4">
-                        @foreach($item->loans()->orderBy('start_date', 'asc')->take(4)->get() as $loan)
-                            @php
+                        @php
+                            $loans = $item->loans()->orderBy('start_date', 'asc')->get()->sortBy(function ($loan) {
+                                if ($loan->anomaly === 'En retard')
+                                    return 0;
                                 $today = now()->format('Y-m-d');
-                                $isCurrent = $loan->start_date <= $today && ($loan->end_date_planned >= $today && !$loan->end_date);
+                                $isCurrent = $loan->start_date <= $today && $loan->end_date_planned >= $today && !$loan->end_date;
                                 $isFuture = $loan->start_date > $today;
-                            @endphp
-                            <div
-                                class="p-6 bg-gray-50 rounded-[30px] border-2 {{ $isCurrent ? 'border-[#FF8C8C] shadow-sm' : 'border-transparent' }}">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex items-center gap-1">
-                                        <p class="text-xl font-bold text-black">{{ $loan->user->name }}</p>
-                                        <p class="text-xl font-bold text-black">{{ $loan->user->surname }}</p>
-                                    </div>
-                                    <p class="font-bold text-black">
-                                        {{ \Carbon\Carbon::parse($loan->start_date)->format('d.m') }} —
-                                        {{ \Carbon\Carbon::parse($loan->end_date_planned)->format('d.m') }}
-                                    </p>
-                                    <div class="text-right">
+                                if ($isCurrent)
+                                    return 1;
+                                if ($isFuture)
+                                    return 2;
+                                return 3;
+                            })->take(4);
+                        @endphp
+                        @forelse($loans as $loan)
+                        @php
+                            $today = now()->format('Y-m-d');
+                            $isCurrent = $loan->start_date <= $today && ($loan->end_date_planned >= $today && !$loan->end_date);
+                            $isFuture = $loan->start_date > $today;
+                            $anomaly = $loan->anomaly;
+                        @endphp
+                        <div
+                            class="p-6 bg-gray-50 rounded-[30px] border-2 {{ $anomaly === 'En retard' ? 'border-red-400' : ($isCurrent ? 'border-[#FF8C8C] shadow-sm' : 'border-transparent') }}">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-1">
+                                    <p class="text-xl font-bold text-black">{{ $loan->user->name }}</p>
+                                    <p class="text-xl font-bold text-black">{{ $loan->user->surname }}</p>
+                                </div>
+                                <p class="font-bold text-black">
+                                    {{ \Carbon\Carbon::parse($loan->start_date)->format('d.m') }} —
+                                    {{ \Carbon\Carbon::parse($loan->end_date_planned)->format('d.m') }}
+                                </p>
+                                <div class="text-right">
+                                    @if($anomaly === 'En retard')
+                                        <span class="badge badge-sm border-none font-black mt-1 bg-red-500 text-white">
+                                            EN RETARD
+                                        </span>
+                                    @else
                                         <span
                                             class="badge badge-sm border-none font-black mt-1 {{ $isCurrent ? 'bg-[#FF8C8C] text-white' : ($isFuture ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400') }}">
                                             {{ $isCurrent ? 'ACTUEL' : ($isFuture ? 'À VENIR' : 'PASSÉ') }}
                                         </span>
-                                    </div>
+                                    @endif
                                 </div>
                             </div>
+                        </div>
                         @endforeach
                     </div>
                 </div>

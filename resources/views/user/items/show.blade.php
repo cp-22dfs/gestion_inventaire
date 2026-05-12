@@ -23,54 +23,96 @@
                     <p class="text-gray-400 text-xl mt-2 max-w-md font-medium">{{ $item->description }}</p>
                 @endif
                 <br>
+
+                @php $currentLoan = $item->currentLoan(); @endphp
+
                 <div class="space-y-6 md:space-y-8">
                     <div class="flex items-center gap-6">
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex-none flex items-center justify-center">
-                            <img src="{{ asset('home.png') }}" alt="Localisation"
-                                class="h-8 w-8 object-contain text-black">
+                            <img src="{{ asset('home.png') }}" alt="Localisation" class="h-8 w-8 object-contain">
                         </div>
                         <span
                             class="text-2xl md:text-3xl font-medium text-black">{{ $item->location ?? 'Non défini' }}</span>
                     </div>
+
                     <div class="flex items-center gap-6">
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex-none flex items-center justify-center">
-                            <img src="{{ asset('boxes.png') }}" alt="Objet" class="h-10 w-10 object-contain">
+                            <img src="{{ asset('boxes.png') }}" alt="Statut" class="h-10 w-10 object-contain">
                         </div>
-                        <span class="text-2xl md:text-3xl font-medium text-black">Libre</span>
+                        <span
+                            class="text-2xl md:text-3xl font-medium {{ $currentLoan ? 'text-[#FF8C8C]' : 'text-black' }}">
+                            {{ $currentLoan ? 'Occupé' : 'Libre' }}
+                        </span>
                     </div>
+
                     <div class="flex items-center gap-6">
                         <div class="w-16 h-16 bg-gray-100 rounded-full flex-none flex items-center justify-center">
                             <img src="{{ asset('user.png') }}" alt="Utilisateur" class="h-7 w-7 object-contain">
                         </div>
-                        <span class="text-2xl md:text-3xl font-medium text-gray-300">Aucun emprunteur</span>
+                        <span
+                            class="text-2xl md:text-3xl font-medium {{ $currentLoan ? 'text-black' : 'text-gray-300' }}">
+                            {{ $currentLoan ? $currentLoan->user->name . ' ' . $currentLoan->user->surname : 'Aucun emprunteur' }}
+                        </span>
                     </div>
+
+                    @if($currentLoan)
+                        <div class="flex items-center gap-6">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex-none flex items-center justify-center">
+                                <img src="{{ asset('calendar.png') }}" alt="Date" class="h-8 w-8 object-contain">
+                            </div>
+                            <span class="text-2xl md:text-3xl font-medium text-black">
+                                Jusqu'au {{ \Carbon\Carbon::parse($currentLoan->end_date_planned)->format('d.m.Y') }}
+                            </span>
+                        </div>
+                    @endif
                 </div>
             </div>
+
             <div class="flex flex-col gap-6 lg:mt-12">
                 <h2 class="text-2xl font-bold text-black flex items-center gap-3">
                     <span class="w-2 h-8 bg-[#89CFF0] rounded-full"></span>
                     Historique
                 </h2>
                 <div class="space-y-3 mb-4">
-                    @forelse($item->loans()->orderBy('start_date', 'asc')->get() as $loan)
+                    @php
+                        $loans = $item->loans()->orderBy('start_date', 'asc')->get()->sortBy(function ($loan) {
+                            if ($loan->anomaly === 'En retard')
+                                return 0;
+                            $today = now()->format('Y-m-d');
+                            $isCurrent = $loan->start_date <= $today && $loan->end_date_planned >= $today && !$loan->end_date;
+                            $isFuture = $loan->start_date > $today;
+                            if ($isCurrent)
+                                return 1;
+                            if ($isFuture)
+                                return 2;
+                            return 3;
+                        })->take(4);
+                    @endphp
+                    @forelse($loans as $loan)
                         @php
                             $today = now()->format('Y-m-d');
                             $isCurrent = $loan->start_date <= $today && $loan->end_date_planned >= $today && !$loan->end_date;
                             $isFuture = $loan->start_date > $today;
+                            $anomaly = $loan->anomaly;
                         @endphp
                         <div
-                            class="p-4 bg-gray-50 rounded-[20px] border-2 {{ $isCurrent ? 'border-[#89CFF0]' : 'border-transparent' }}">
+                            class="p-4 bg-gray-50 rounded-[20px] border-2 {{ $anomaly === 'En retard' ? 'border-red-400' : ($isCurrent ? 'border-[#89CFF0]' : 'border-transparent') }}">
                             <div class="flex justify-between items-center">
                                 <p class="font-bold text-black">{{ $loan->user->name }} {{ $loan->user->surname }}</p>
                                 <p class="text-sm text-gray-500">
                                     {{ \Carbon\Carbon::parse($loan->start_date)->format('d.m') }} —
                                     {{ \Carbon\Carbon::parse($loan->end_date_planned)->format('d.m') }}
                                 </p>
-                                <span
-                                    class="badge badge-sm border-none font-black
-                                                                                            {{ $isCurrent ? 'bg-[#89CFF0] text-white' : ($isFuture ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400') }}">
-                                    {{ $isCurrent ? 'ACTUEL' : ($isFuture ? 'À VENIR' : 'PASSÉ') }}
-                                </span>
+                                @if($anomaly === 'En retard')
+                                    <span class="badge badge-sm border-none font-black bg-red-500 text-white">
+                                        EN RETARD
+                                    </span>
+                                @else
+                                    <span
+                                        class="badge badge-sm border-none font-black {{ $isCurrent ? 'bg-[#89CFF0] text-white' : ($isFuture ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-400') }}">
+                                        {{ $isCurrent ? 'ACTUEL' : ($isFuture ? 'À VENIR' : 'PASSÉ') }}
+                                    </span>
+                                @endif
                             </div>
                         </div>
                     @empty
@@ -84,6 +126,7 @@
             </div>
         </div>
     </div>
+
     <dialog id="booking_modal" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box bg-white rounded-t-3xl sm:rounded-3xl">
             <h3 class="font-bold text-3xl text-black mb-6">Réserver l'objet</h3>
@@ -130,6 +173,7 @@
             <button>close</button>
         </form>
     </dialog>
+
     @if($errors->has('conflict') || $errors->any())
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -137,7 +181,6 @@
             });
         </script>
     @endif
-
 </body>
 
 </html>
