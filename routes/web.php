@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
         })->name('scan');
         Route::post('/scan', [ItemController::class, 'scan'])->name('scan.post');
         Route::get('/borrow/{item}', [ItemController::class, 'borrowShow'])->name('borrow.show');
+        Route::get('/choice/{item}', [ItemController::class, 'choiceShow'])->name('choice.show');
+
     });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {

@@ -32,10 +32,20 @@ class LoanController extends Controller
             'end_date.required_if' => 'La date de retour réelle est obligatoire lorsque le statut est "rendu".',
         ]);
 
-        $data = $request->all();
-        $startDate = \Carbon\Carbon::parse($request->start_date);
-        $today = now()->startOfDay();
+        $conflit = Loan::where('item_id', $loan->item_id)
+            ->where('id', '!=', $loan->id)
+            ->whereNotIn('status', ['returned'])
+            ->where('start_date', '<', $request->end_date_planned)
+            ->where('end_date_planned', '>', $request->start_date)
+            ->exists();
 
+        if ($conflit) {
+            return back()->withErrors([
+                'conflict' => 'Cette modification crée un conflit avec une réservation existante.'
+            ])->withInput();
+        }
+
+        $data = $request->all();
 
         if ($request->status === 'returned') {
             $data['end_date'] = $request->end_date ?? now();
@@ -43,7 +53,7 @@ class LoanController extends Controller
             $data['end_date'] = null;
         }
 
-        $loan->update($request->all());
+        $loan->update($data);
 
         return redirect()->route('admin.loans.index')->with('success', 'Prêt mis à jour avec succès.');
     }
@@ -69,10 +79,10 @@ class LoanController extends Controller
             $currentLoan->update([
                 'status' => Loan::STATUS_BORROWED,
                 'location' => $request->location ?? $currentLoan->location,
-                'end_date_planned' => $request->end_date_planned ?? $currentLoan->end_date_planned,
+                'end_date_planned' => $currentLoan->end_date_planned,
             ]);
 
-            return redirect()->route('user.dashboard')->with('success', 'Emprunt enregistré avec succès !');
+            return redirect()->route('user.dashboard')->with('success', 'Prêt enregistré avec succès !');
         }
 
         $conflit = Loan::where('item_id', $request->item_id)
@@ -95,6 +105,6 @@ class LoanController extends Controller
             'status' => $request->status === 'borrowed' ? Loan::STATUS_BORROWED : Loan::STATUS_RESERVED,
         ]);
 
-        return redirect()->route('items.show', $request->item_id)->with('success', 'Emprunt enregistré avec succès !');
+        return redirect()->route('items.show', $request->item_id)->with('success', 'Prêt enregistré avec succès !');
     }
 }

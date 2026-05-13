@@ -33,16 +33,13 @@
             class="input border-0 border-b-2 border-gray-200 rounded-none w-full bg-transparent px-2 mb-8 focus:outline-none {{ $isAdmin ? 'focus:border-[#FF8C8C]' : 'focus:border-[#87CEFA]' }}" 
             required autofocus>
         <input type="password" name="password" placeholder="Mot de passe" 
-            class="input border-0 border-b-2 border-gray-200 rounded-none w-full bg-transparent px-2 mb-4 focus:outline-none {{ $isAdmin ? 'focus:border-[#FF8C8C]' : 'focus:border-[#87CEFA]' }}" 
+            class="input border-0 border-b-2 border-gray-200 rounded-none w-full bg-transparent px-2 mb-10 focus:outline-none {{ $isAdmin ? 'focus:border-[#FF8C8C]' : 'focus:border-[#87CEFA]' }}" 
             required>
         @error('email')
             <p class="text-[#FF8C8C] text-sm text-center mb-6 font-medium italic">
                 {{ $message }}
             </p>
         @enderror
-        <div class="text-center mb-10">
-            <a href="#" class="text-gray-400 text-sm">Mot de passe oublié ?</a>
-        </div>
         <button type="submit" 
             class="btn btn-lg w-full rounded-full border-none text-black text-2xl h-20 normal-case shadow-lg font-bold 
             {{ $isAdmin ? 'bg-[#FF8C8C] hover:bg-[#f77474]' : 'bg-[#87CEFA] hover:bg-[#70c2f5]' }}">

@@ -149,8 +149,18 @@
                     <div class="form-control">
                         <label class="label"><span class="label-text font-bold text-black text-lg">Date de fin
                                 prévue</span></label>
-                        <input type="date" name="end_date_planned"
+                        <input type="date" name="end_date_planned" id="end_date_planned"
                             class="input input-bordered h-14 rounded-xl bg-gray-50 border-none text-lg" required>
+                        <div class="flex gap-2 mt-2">
+                            <button type="button" onclick="addDays('end_date_planned', 1)"
+                                class="btn btn-sm rounded-full border-none bg-gray-100 text-black font-bold normal-case flex-1">
+                                +1 jour
+                            </button>
+                            <button type="button" onclick="addDays('end_date_planned', 7)"
+                                class="btn btn-sm rounded-full border-none bg-gray-100 text-black font-bold normal-case flex-1">
+                                +1 semaine
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="form-control">
@@ -160,12 +170,16 @@
                         class="input input-bordered h-14 rounded-xl bg-gray-50 border-none text-lg">
                 </div>
                 <div class="modal-action flex flex-col gap-3">
-                    <button type="submit"
-                        class="btn btn-lg w-full rounded-full border-none bg-[#89CFF0] text-black font-bold h-16 shadow-lg">
-                        Confirmer la réservation
-                    </button>
-                    <button type="button" onclick="booking_modal.close()"
-                        class="btn btn-ghost w-full text-gray-400 font-bold">Annuler</button>
+                    <div class="modal-action flex flex-col gap-3">
+                        <button type="submit"
+                            class="btn btn-lg w-full rounded-full border-none bg-[#89CFF0] hover:bg-[#7bc4e6] text-black font-bold h-16 shadow-lg normal-case">
+                            Confirmer la réservation
+                        </button>
+                        <button type="button" onclick="booking_modal.close()"
+                            class="btn btn-ghost w-full text-gray-400 font-bold normal-case hover:bg-transparent hover:text-gray-500 border-none">
+                            Annuler
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -174,13 +188,21 @@
         </form>
     </dialog>
 
-    @if($errors->has('conflict') || $errors->any())
+    @if($errors->has('conflict') || $errors->any() || request()->query('reserve') === '1')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 booking_modal.showModal();
             });
         </script>
     @endif
+    <script>
+        function addDays(fieldId, days) {
+            const field = document.getElementById(fieldId);
+            const today = field.value ? new Date(field.value) : new Date();
+            today.setDate(today.getDate() + days);
+            field.value = today.toISOString().split('T')[0];
+        }
+    </script>
 </body>
 
 </html>

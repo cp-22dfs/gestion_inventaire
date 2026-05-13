@@ -49,11 +49,21 @@
 
                 <div class="flex flex-col gap-1 w-full">
                     <label class="text-sm font-bold text-gray-400 ml-4">Date de retour prévue</label>
-                    <input type="date" name="end_date_planned"
+                    <input type="date" name="end_date_planned" id="end_date_planned_borrow"
                         value="{{ $currentLoan ? \Carbon\Carbon::parse($currentLoan->end_date_planned)->format('Y-m-d') : '' }}"
-                        min="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                        min="{{ date('Y-m-d', strtotime('+1 day')) }}" {{ $currentLoan ? 'readonly' : '' }}
                         class="input bg-gray-100 border-none rounded-full px-6 h-14 w-full focus:ring-2 focus:ring-[#89CFF0]"
                         required>
+                    <div class="flex gap-2 mt-2">
+                        <button type="button" onclick="addDays('end_date_planned_borrow', 1)"
+                            class="btn btn-sm rounded-full border-none bg-gray-100 text-black font-bold normal-case flex-1">
+                            +1 jour
+                        </button>
+                        <button type="button" onclick="addDays('end_date_planned_borrow', 7)"
+                            class="btn btn-sm rounded-full border-none bg-gray-100 text-black font-bold normal-case flex-1">
+                            +1 semaine
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit"
@@ -63,6 +73,14 @@
             </form>
         @endif
     </div>
+    <script>
+        function addDays(fieldId, days) {
+            const field = document.getElementById(fieldId);
+            const today = field.value ? new Date(field.value) : new Date();
+            today.setDate(today.getDate() + days);
+            field.value = today.toISOString().split('T')[0];
+        }
+    </script>
 </body>
 
 </html>

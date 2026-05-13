@@ -44,7 +44,7 @@ class ItemController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'serial_number' => 'required|string|unique:items,serial_number,' . $item->id, // On ignore l'ID actuel pour l'unique
+            'serial_number' => 'required|string|unique:items,serial_number,' . $item->id,
             'location' => 'nullable|string|max:255',
             'description' => 'nullable|string',
         ]);
@@ -121,12 +121,21 @@ class ItemController extends Controller
             }
             return redirect()->route('user.dashboard')->with('occupied', $item->name);
         }
-        return redirect()->route('borrow.show', $item->id);
+        if ($currentLoan && $currentLoan->status === Loan::STATUS_RESERVED && $currentLoan->user_id !== Auth::id()) {
+            return redirect()->route('user.dashboard')->with('occupied', $item->name);
+        }
+
+        return redirect()->route('choice.show', $item->id);
     }
 
     public function borrowShow(Item $item)
     {
         $currentLoan = $item->currentLoan();
         return view('user.borrow', compact('item', 'currentLoan'));
+    }
+
+    public function choiceShow(Item $item)
+    {
+        return view('user.choice', compact('item'));
     }
 }

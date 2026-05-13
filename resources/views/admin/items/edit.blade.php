@@ -53,6 +53,11 @@
             </div>
         </form>
     </div>
+    @if($errors->has('conflict'))
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-2xl">
+            <p class="text-sm text-red-700 font-bold">{{ $errors->first('conflict') }}</p>
+        </div>
+    @endif
 </body>
 
 </html>
